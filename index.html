@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, initial-scale=1">
+<title>SIG Wetzikon · Ayasofya Camii</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#0c0c0c;cursor:none;}
+  .stage{position:fixed;inset:0;}
+  .slide{position:absolute;inset:0;opacity:0;transition:opacity 1.2s ease-in-out;}
+  .slide.on{opacity:1;}
+  /* bulanık arka plan dolgusu (dikey afiş yatay ekranda boşluk bırakmasın diye) */
+  .slide .bg{position:absolute;inset:0;background-size:cover;background-position:center;
+            filter:blur(34px) brightness(.45);transform:scale(1.12);}
+  .slide .bg:after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.25);}
+  /* ortadaki net afiş */
+  .slide .fg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+  .slide .fg img{height:100%;width:auto;max-width:100%;object-fit:contain;
+            box-shadow:0 18px 70px rgba(0,0,0,.55);}
+</style>
+</head>
+<body>
+<div class="stage" id="stage"></div>
+
+<script>
+/* ============================================================
+   AFİŞLERİ BURADAN YÖNET
+   - Her satır bir afiş:  { src:"images/dosya.jpg", sec:10 }
+   - src   = images klasöründeki dosya adı
+   - sec   = ekranda kaç saniye kalsın
+   - Sırayı değiştirmek / afiş eklemek-çıkarmak için
+     sadece bu listeyi düzenleyip GitHub'a push et.
+   ============================================================ */
+const SLIDES = [
+  { src: "images/program.jpg",   sec: 12 },
+  { src: "images/yatsi.jpg",     sec: 10 },
+  { src: "images/cuma.jpg",      sec: 10 },
+  { src: "images/moschee.jpg",   sec: 12 },
+  { src: "images/lahmacun.jpg",  sec: 10 },
+];
+
+/* Bir tam tur bitince sayfa kendini yeniler → GitHub'daki
+   yeni afişleri/değişiklikleri otomatik alır. */
+const stage = document.getElementById("stage");
+
+// slaytları oluştur
+const els = SLIDES.map(s => {
+  const slide = document.createElement("div");
+  slide.className = "slide";
+  slide.innerHTML =
+    `<div class="bg" style="background-image:url('${s.src}')"></div>` +
+    `<div class="fg"><img src="${s.src}" alt=""></div>`;
+  stage.appendChild(slide);
+  return slide;
+});
+
+let i = 0;
+function show(n){
+  els.forEach((el,k)=>el.classList.toggle("on", k===n));
+}
+function next(){
+  const last = i;
+  i = (i + 1) % els.length;
+  show(i);
+  // tur tamamlandıysa (başa döndük) güncellemeleri almak için yenile
+  if (i === 0 && last !== 0){
+    setTimeout(()=>location.reload(), 2000);
+    return;
+  }
+  schedule();
+}
+function schedule(){
+  setTimeout(next, (SLIDES[i].sec || 10) * 1000);
+}
+
+// başlat
+if (els.length){ show(0); schedule(); }
+</script>
+</body>
+</html>
